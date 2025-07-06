@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+<!-- just a test -->
 <head>
   <meta charset="UTF-8">
   <title>Bible Verse Trainer</title>
@@ -62,7 +63,6 @@
     }
 
     function splitIntoPhrases(verseText) {
-      // Keep punctuation with the phrase, trim whitespace
       return verseText.match(/[^,.;]+[.,;]?/g).map(p => p.trim());
     }
 
@@ -93,17 +93,30 @@
       if (currentPhraseIndex > 0) {
         currentPhraseIndex--;
         updateText();
+      } else if (currentVerseIndex > 0) {
+        currentVerseIndex--;
+        showVerse();
       }
     }
 
     function hideVerse() {
-      currentPhraseIndex = 0;
-      updateText();
+      if (currentPhraseIndex > 0) {
+        currentPhraseIndex = 0;
+        updateText();
+      } else if (currentVerseIndex > 0) {
+        currentVerseIndex--;
+        showVerse();
+      }
     }
 
     function showFullVerse() {
-      currentPhraseIndex = currentPhrases.length;
-      updateText();
+      if (currentPhraseIndex < currentPhrases.length) {
+        currentPhraseIndex = currentPhrases.length;
+        updateText();
+      } else if (currentVerseIndex < verses.length - 1) {
+        currentVerseIndex++;
+        showVerse();
+      }
     }
 
     loadVerses();
