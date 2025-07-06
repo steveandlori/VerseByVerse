@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Bible Verse Trainer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding: 2em;
+      background: #f9f9f9;
+    }
+    #verseRef {
+      font-weight: bold;
+      font-size: 1.5em;
+      margin-bottom: 1em;
+    }
+    #verseText {
+      font-size: 1.2em;
+      min-height: 3em;
+      margin-bottom: 2em;
+    }
+    button {
+      font-size: 1.2em;
+      margin: 0.5em;
+      padding: 0.5em 1em;
+    }
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 1em;
+      flex-wrap: wrap;
+    }
+  </style>
+</head>
+<body>
+  <h1>Bible Verse Trainer</h1>
+  <div id="verseRef">Loading...</div>
+  <div id="verseText"></div>
+  <div class="controls">
+    <button onclick="hideVerse()">⏪</button>
+    <button onclick="prevPhrase()">◀ Prev</button>
+    <button onclick="nextPhrase()">Next ▶</button>
+    <button onclick="showFullVerse()">⏩</button>
+  </div>
+
+  <script>
+    let verses = [];
+    let currentVerseIndex = 0;
+    let currentPhraseIndex = 0;
+    let currentPhrases = [];
+
+    async function loadVerses() {
+      const response = await fetch('John.tsv');
+      const text = await response.text();
+      verses = text.trim().split('\n').map(line => {
+        const [ref, verse] = line.split('\t');
+        return { ref, verse };
+      });
+      showVerse();
+    }
+
+    function splitIntoPhrases(verseText) {
+      // Keep punctuation with the phrase, trim whitespace
+      return verseText.match(/[^,.;]+[.,;]?/g).map(p => p.trim());
+    }
+
+    function showVerse() {
+      const { ref, verse } = verses[currentVerseIndex];
+      document.getElementById('verseRef').textContent = ref;
+      currentPhrases = splitIntoPhrases(verse);
+      currentPhraseIndex = 0;
+      updateText();
+    }
+
+    function updateText() {
+      const visible = currentPhrases.slice(0, currentPhraseIndex).join(' ');
+      document.getElementById('verseText').textContent = visible;
+    }
+
+    function nextPhrase() {
+      if (currentPhraseIndex < currentPhrases.length) {
+        currentPhraseIndex++;
+        updateText();
+      } else if (currentVerseIndex < verses.length - 1) {
+        currentVerseIndex++;
+        showVerse();
+      }
+    }
+
+    function prevPhrase() {
+      if (currentPhraseIndex > 0) {
+        currentPhraseIndex--;
+        updateText();
+      }
+    }
+
+    function hideVerse() {
+      currentPhraseIndex = 0;
+      updateText();
+    }
+
+    function showFullVerse() {
+      currentPhraseIndex = currentPhrases.length;
+      updateText();
+    }
+
+    loadVerses();
+  </script>
+</body>
+</html>
